@@ -6,6 +6,8 @@ import Logout from "./components/Logout"
 import Activate from "./components/Activate"
 import Deposit from "./components/Deposit"
 import UserAccounts from "./components/UserAccounts"
+import TransferMoney from "./components/TransferMoney"
+import Transactions from "./components/Transactions"
 
 import {
   BrowserRouter as Router,
@@ -28,6 +30,8 @@ function App() {
           <Route exact path="/activate" element={<Activate />}></Route>
           <Route exact path="/deposit" element={<Deposit />}></Route>
           <Route exact path="/user/accounts" element={<UserAccounts />}></Route>
+          <Route exact path="/transfer-money" element={<TransferMoney />}></Route>
+          <Route exact path="/user/transactions" element={<Transactions />}></Route>
         </Routes>
       </div>
     </Router>

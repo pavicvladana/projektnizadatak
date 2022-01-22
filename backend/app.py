@@ -2,7 +2,9 @@ from concurrent.futures import process
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+import email
 from locale import currency
+from time import sleep
 from urllib import response
 from decimal import Decimal
 from flask import Flask, request, Response
@@ -13,8 +15,6 @@ from flask_jwt_extended import get_jwt
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
-from flask_jwt_extended import set_access_cookies
-from flask_jwt_extended import unset_jwt_cookies
 from flask_expects_json import expects_json
 import os
 from flask_sqlalchemy import SQLAlchemy
@@ -99,14 +99,19 @@ class Transaction(db.Model):
             output['amount'] = self.amount
             output['currency'] = self.currency
             output['payer'] = self.payer
-            output['receiver'] = self.receiver
+            rec_user = User.query.filter_by(username = self.receiver).first()
+            if(rec_user is None):
+                output['receiver'] = self.receiver
+            else:
+                output['receiver'] = rec_user.email
+            
             output['state'] = self.state
             return output
 
 class ETransactionState(StrEnum):
-    in_progress = "IN_PROGRESS"
-    success = "SUCCESS"
-    failed = "FAILED"
+    in_progress = "In progress"
+    success = "Success"
+    failed = "Failed"
 
 #endregion
 
@@ -128,7 +133,6 @@ def refresh_expiring_jwts(response):
         target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
         if target_timestamp > exp_timestamp:
             access_token = create_access_token(identity=get_jwt_identity())
-            set_access_cookies(response, access_token)
         return response
     except (RuntimeError, KeyError):
         # Case where there is not a valid JWT. Just return the original respone
@@ -151,7 +155,6 @@ def login():
 @app.route("/logout", methods=["POST"])
 def logout():
     response = jsonify({"msg": "logout successful"})
-    unset_jwt_cookies(response)
     return response
 
 @app.route("/register", methods=["POST"])
@@ -257,7 +260,7 @@ def deposit():
 
     return jsonify({"msg":"money deposited."})
 
-@app.route("/user/transactions", methods=["Post"])
+@app.route("/user/transactions")
 @jwt_required()
 def transactions():
     username = get_jwt_identity()
@@ -265,10 +268,10 @@ def transactions():
     if user is None:
         return jsonify({"error":"unable to find user"})
     
-    accs_payer = Transaction.query.filter_by(payer=user.username)
-    accs_receiver = Transaction.query.filter_by(receiver=user.username)
+    trans_payer = Transaction.query.filter_by(payer=user.username)
+    trans_receiver = Transaction.query.filter_by(receiver=user.username)
     
-    return jsonify({"trans_as_payer": [acc.account_data() for acc in accs_payer], "trans_as_receiver": [acc.account_data() for acc in accs_receiver]})
+    return jsonify({"trans_as_payer": [trans.data() for trans in trans_payer], "trans_as_receiver": [trans.data() for trans in trans_receiver]})
 
 @app.route("/user/send-to-user", methods=["POST"])
 @jwt_required()
@@ -294,27 +297,27 @@ def send_money_to_user():
         return jsonify({"error":"there is no account with given currency"})
 
     amount = Decimal(data['amount'])
-    trans = Transaction(
-        amount = amount,
-        currency = acc.currency,
-        payer = user.username,
-        receiver = receiver.username,
-        state = str(ETransactionState.in_progress)
-    )
-    db.session.add(trans)
     
-    process = Thread(target=send_to_user_process, args=(trans, acc, receiver, amount, app, ))
+    process = Thread(target=send_to_user_process, args=(user, acc, receiver, amount, app, ))
     process.start()
-    db.session.commit()
 
     return jsonify({"msg":"transaction started."})
 
-def send_to_user_process(transaction, acc, receiver, amount, app, db):
+def send_to_user_process(payer, acc, receiver, amount, app):
     with app.app_context():
-        transaction = Transaction.query.filter_by(id=transaction.id).first()
-
+        trans = Transaction(
+            amount = amount,
+            currency = acc.currency,
+            payer = payer.username,
+            receiver = receiver.username,
+            state = str(ETransactionState.in_progress)
+        )
+        db.session.add(trans)
+        db.session.commit()
+        sleep(20)
+        acc = Account.query.filter_by(id=acc.id).first()
         if acc.balance < amount:
-            transaction.state = str(ETransactionState.failed)
+            trans.state = str(ETransactionState.failed)
             return jsonify({"error":"not enough money on account."})
 
         receiver_acc = Account.query.filter_by(owner=receiver.username, currency=acc.currency).first()
@@ -328,9 +331,9 @@ def send_to_user_process(transaction, acc, receiver, amount, app, db):
             db.session.add(acc)
         
         
-        transaction.state = str(ETransactionState.success)
+        trans.state = str(ETransactionState.success)
         acc.balance -= amount
-        receiver_acc += amount
+        receiver_acc.balance += amount
         
         db.session.commit()
 

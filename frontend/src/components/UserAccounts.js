@@ -10,7 +10,6 @@ const columns = [
 ];
 
 let idCounter = 0;
-const token = localStorage.getItem("REACT_TOKEN_AUTH_KEY");
 const createRandomRow = () => {
   idCounter += 1;
   return { id: idCounter, username: randomUserName(), age: randomInt(10, 80) };
@@ -18,6 +17,8 @@ const createRandomRow = () => {
 
 export default function UserAccounts() {
     const [rows, setRows] = React.useState([]);
+    
+    const token = localStorage.getItem("REACT_TOKEN_AUTH_KEY");
     React.useEffect(() => {
         const requestOptions = {
             method: "GET",
@@ -38,7 +39,7 @@ export default function UserAccounts() {
     
   return (
     <div style={{ width: '100%'}}>
-      <Box sx={{ height: 700, bgcolor: 'background.paper' }}>
+      <Box sx={{ width: '100%',height: 10*52, bgcolor: 'background.paper' }}>
         <DataGrid hideFooter rows={rows} columns={columns} />
       </Box>
     </div>

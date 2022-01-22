@@ -59,6 +59,9 @@ const Navbar = () => {
             <Typography variant="h6" className={classes.title}>
               <NavLink to="/deposit">Deposite money</NavLink>
             </Typography>
+            <Typography variant="h6" className={classes.title}>
+                <NavLink to="/transfer-money">Tranfer money</NavLink>
+              </Typography>
             </>
             )
             : <></>
@@ -74,6 +77,9 @@ const Navbar = () => {
           </Button>
         </> : 
         <>
+          <Button>
+            <NavLink to="/user/transactions">My transactions</NavLink>
+          </Button>
           <Button>
             <NavLink to="/user/accounts">My account</NavLink>
           </Button>
