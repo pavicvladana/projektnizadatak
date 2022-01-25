@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     }
   }));
 
-export default function ColorToggleButton() {
+export default function TransferMoney() {
   const [choice, setChoice] = React.useState('web');
 
   const handleChange = (event, newChoice) => {

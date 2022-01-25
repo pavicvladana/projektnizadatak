@@ -29,9 +29,6 @@ export default function EnhancedTable() {
     .then((data) => {
         console.log(data)
         let transactions = data.trans_as_payer.concat(data.trans_as_receiver)
-        for (let index = 0; index < transactions.length; ++index) {
-            transactions[index].amount = parseFloat(transactions[index].amount)
-        }
         setRows(transactions);
     })
     .catch((err) => console.log(err));

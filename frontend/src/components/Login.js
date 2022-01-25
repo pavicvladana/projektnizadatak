@@ -20,17 +20,12 @@ function Login() {
   });
 
   const onSubmit = (data) => {
-    const body = {
-      email: data.email,
-      password: data.password,
-    };
-
     const requestOptions = {
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(data),
     };
 
     fetch("http://localhost:5000/login", requestOptions)
@@ -40,9 +35,9 @@ function Login() {
           if(data.error){
             alert(data.error);
           }else{
-            login(data.access_token)
-            localStorage.setItem("active", data.active)
-            console.log(data)
+            login(data.access_token);
+            localStorage.setItem("active", data.active);
+            //console.log(data);
             window.location.href = "/home";
           }
         }

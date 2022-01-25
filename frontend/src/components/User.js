@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
 import "../index.css";
 
-function Register() {
+function User() {
   const { register, handleSubmit } = useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState();
@@ -143,4 +143,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default User;

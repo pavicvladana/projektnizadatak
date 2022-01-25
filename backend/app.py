@@ -143,7 +143,7 @@ def refresh_expiring_jwts(response):
 @expects_json(login_schema)
 def login():
     data = request.get_json()
-    user = User.query.filter_by(email = data['email'], password = data['password']).first()
+    user = User.query.filter_by(email=data['email'], password=data['password']).first()
     if user is None:
         return jsonify({"error":"username/password is wrong"})
         #return jsonify({"error":"username/password is wrong"})
@@ -251,8 +251,8 @@ def activate_user():
     if user.active:
         return jsonify({"error": "user is already activated!"})
 
-    cc = credit_cards[data['cc_number']]
-    if cc is None:
+    
+    if data['cc_number'] not in credit_cards:
         return jsonify({"error": "invalid credit card number!"})
     
     user.active = True
@@ -292,6 +292,9 @@ def deposit():
         return jsonify({"error":"user is not activated"})
     
     #check credit card
+    if data['cc_number'] not in credit_cards:
+        return jsonify({"error": "invalid credit card number!"})
+
 
     acc = Account.query.filter_by(owner=user.username, currency="RSD").first()
     acc.balance += Decimal(data['amount'])
@@ -339,8 +342,8 @@ def send_money_to_user():
 
     amount = Decimal(data['amount'])
     
-    process = Thread(target=send_to_user_process, args=(user, acc, receiver, amount, app, ))
-    process.start()
+    thread = Thread(target=send_to_user_process, args=(user, acc, receiver, amount, app, ))
+    thread.start()
 
     return jsonify({"msg":"transaction started."})
 
@@ -355,7 +358,7 @@ def send_to_user_process(payer, acc, receiver, amount, app):
         )
         db.session.add(trans)
         db.session.commit()
-        sleep(20)
+        sleep(10)
         acc = Account.query.filter_by(id=acc.id).first()
         if acc.balance < amount:
             trans.state = str(ETransactionState.failed)
@@ -376,7 +379,7 @@ def send_to_user_process(payer, acc, receiver, amount, app):
         trans.state = str(ETransactionState.success)
         acc.balance -= amount
         receiver_acc.balance += amount
-        
+        sleep(10)
         db.session.commit()
 
 @app.route("/user/sent-to-bank-account", methods=["POST"])
@@ -400,8 +403,8 @@ def send_money_to_bank_account():
     if acc.balance < amount:
         return jsonify({"error":"not enough money on account."})
     
-    process = Thread(target=send_to_bank_account, args=(user, acc.id, data['to'], amount, app,))
-    process.start()
+    thread = Thread(target=send_to_bank_account, args=(user, acc.id, data['to'], amount, app,))
+    thread.start()
 
     return jsonify({"msg":"money deposited."})
 
@@ -453,7 +456,10 @@ def exchange_money():
     if r is None:
         return jsonify({"error":"invalid currency"})
     #check credit card
+    if data['cc_number'] not in credit_cards:
+        return jsonify({"error": "invalid credit card number!"})
 
+    
     acc = Account.query.filter_by(owner=user.username, currency=currency).first()
     if acc is None:
         acc = Account(

@@ -40,7 +40,7 @@ export default function TransferMoneyToUser() {
     const onSubmit = data => {
         data.amount = parseFloat(data.amount)
         if(data.amount == NaN){
-            alert("Please enter valid numbre")
+            alert("Please enter valid number.")
             return;
         }
         data.acc_id = account.id

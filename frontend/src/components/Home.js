@@ -11,7 +11,6 @@ function Home() {
   if(!logged_in){
     navigate("/login")
   }
-  
 
   return (
       <div>

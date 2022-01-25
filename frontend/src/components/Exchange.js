@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 export default function Exchange() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [currencyList, setCurrencyList] = useState({});
-  const [currency, setCurrency] = useState('RSD')
+  const [currency, setCurrency] = useState('USD')
   const [cost, setCost] = useState()
   const [amount, setAmount] = useState()
   const navigate = useNavigate()

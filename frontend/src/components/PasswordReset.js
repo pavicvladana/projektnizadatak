@@ -37,7 +37,7 @@ export default function ResetPassword() {
   
   return (
     <div className="App">
-        <h1>User profile</h1>
+        <h1>Reset password</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
         <input type="password" placeholder="Old password" {...register("old_password", {required: true})} />
         <input type="password" placeholder="Password" {...register("password", {required: true, min: 8})} />
