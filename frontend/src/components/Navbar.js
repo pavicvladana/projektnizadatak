@@ -46,7 +46,7 @@ const Navbar = () => {
           <HomeIcon onClick={() => {window.location.href = '/home';}} />
         </IconButton>
         { logged_in ? 
-            (!active ?
+            (active == 'false' ?
             <>
               <Typography variant="h6" className={classes.title}>
                 <NavLink to="/activate">Activate</NavLink>
