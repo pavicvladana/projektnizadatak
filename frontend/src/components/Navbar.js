@@ -62,6 +62,9 @@ const Navbar = () => {
             <Typography variant="h6" className={classes.title}>
                 <NavLink to="/transfer-money">Tranfer money</NavLink>
               </Typography>
+              <Typography variant="h6" className={classes.title}>
+              <NavLink to="/exchange">Exchange</NavLink>
+            </Typography>
             </>
             )
             : <></>
@@ -81,7 +84,10 @@ const Navbar = () => {
             <NavLink to="/user/transactions">My transactions</NavLink>
           </Button>
           <Button>
-            <NavLink to="/user/accounts">My account</NavLink>
+            <NavLink to="/user">My profile</NavLink>
+          </Button>
+          <Button>
+            <NavLink to="/user/accounts">My accounts</NavLink>
           </Button>
           <Button>
             <NavLink to="/logout">Logout</NavLink>

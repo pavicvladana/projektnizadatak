@@ -76,6 +76,7 @@ export default function TransferMoneyToUser() {
     return (
         <>
          <h1>Transfer money to user.</h1>
+         <br></br>         
          <Stack direction="row" spacing={2}>
             <Box sx={{ minWidth: 250 }}>
                     <FormControl fullWidth>
@@ -92,7 +93,7 @@ export default function TransferMoneyToUser() {
                             accounts.map((acc, i) => {
                                 return(
                                 <MenuItem key={i} value={acc}>
-                                {acc.id}
+                                 {acc.currency} - {acc.id}
                                 </MenuItem>
                             )})
                         }
