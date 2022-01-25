@@ -23,6 +23,19 @@ register_schema = {
     'required': ['email', 'username', 'password', 'firstname', 'lastname', 'address', 'city', 'country', 'phone']
 }
 
+user_edit_schema = {
+    'type': 'object',
+    'properties': {
+        'firstname': {'type': 'string'},
+        'lastname': {'type': 'string'},
+        'address': {'type': 'string'},
+        'city': {'type': 'string'},
+        'country': {'type': 'string'},
+        'phone': {'type': 'string'}
+    },
+    'required': ['firstname', 'lastname', 'address', 'city', 'country', 'phone']
+}
+
 activation_schema = {
     'type': 'object',
     'properties': {
@@ -54,4 +67,17 @@ send_schema = {
         'amount': {'type': 'number'}
     },
     'required': ['to', 'acc_id', 'amount']
+}
+
+exchange_schema = {
+    'type': 'object',
+    'properties': {
+        'cc_number': {'type': 'string'},
+        'name': {'type': 'string'},
+        'exp_date': {'type': 'string'},
+        'password': {'type': 'string'},
+        'amount': {'type': 'number'},
+        'currency': {'type': 'string'}
+    },
+    'required': ['cc_number', 'name', 'exp_date', 'password', 'amount', 'currency']
 }

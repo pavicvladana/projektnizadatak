@@ -9,7 +9,7 @@ from urllib import response
 from decimal import Decimal
 from flask import Flask, request, Response
 from flask import jsonify
-
+import requests
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt
 from flask_jwt_extended import get_jwt_identity
@@ -19,7 +19,7 @@ from flask_expects_json import expects_json
 import os
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import false
-from json_schemas import login_schema, register_schema, activation_schema, deposit_schema, send_schema
+from json_schemas import *
 from flask_cors import CORS
 from random import seed
 from random import randint
@@ -62,10 +62,10 @@ class User(db.Model):
     def user_data(self):
         output = {}
         output['username'] = self.username
-        output['fistname'] = self.firstname
+        output['firstname'] = self.firstname
         output['email'] = self.email
         output['active'] = self.active
-        output['lastName'] = self.lastname
+        output['lastname'] = self.lastname
         output['address'] = self.address
         output['city'] = self.city
         output['country'] = self.country
@@ -151,7 +151,6 @@ def login():
     access_token = create_access_token(identity=user.username)
     return jsonify(access_token=access_token, active=user.active)
 
-
 @app.route("/logout", methods=["POST"])
 def logout():
     response = jsonify({"msg": "logout successful"})
@@ -188,6 +187,27 @@ def register():
     db.session.commit()
 
     return jsonify({'msg' : 'new user created!'})
+
+@app.route('/user', methods=["PUT"])
+@jwt_required()
+@expects_json(user_edit_schema)
+def edit_user():
+    data = request.get_json()
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return jsonify({"error":"unable to find user"})
+
+    user.firstname = data['firstname']
+    user.lastname = data['lastname']
+    user.address = data['address']
+    user.city = data['city']
+    user.country = data['country']
+    user.phone = data['phone']
+
+    db.session.commit()
+
+    return jsonify({"msg":"user successfully modified!"})
 
 @app.route("/user", methods=["GET"])
 @jwt_required()
@@ -367,6 +387,45 @@ def send_money_to_bank_account():
 
     return jsonify({"msg":"money deposited."})
 
+@app.route("/exchange")
+@jwt_required()
+def exchange():
+    r = requests.get("https://api.fastforex.io/fetch-all?from=RSD&api_key=585d303673-7f543ac429-r6645m").json()['results']
+    return r
+
+@app.route("/exchange", methods=['POST'])
+@jwt_required()
+@expects_json(exchange_schema)
+def exchange_money():
+    data = request.get_json()
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return jsonify({"error":"unable to find user"})
+    if not user.active:
+        return jsonify({"error":"user is not activated"})
+    
+    #check currency
+    currency = data['currency']
+    r = requests.get("https://api.fastforex.io/fetch-all?from=RSD&api_key=585d303673-7f543ac429-r6645m").json()['results']
+    if r is None:
+        return jsonify({"error":"invalid currency"})
+    #check credit card
+
+    acc = Account.query.filter_by(owner=user.username, currency=currency).first()
+    if acc is None:
+        acc = Account(
+            id = str(randint(100,999)) + "-" + str(randint(100000,999999)),
+            balance = 0,
+            currency = currency,
+            owner = username
+        )
+        db.session.add(acc)
+
+    acc.balance += Decimal(data['amount'])
+    db.session.commit()
+
+    return jsonify({"msg":"money exchanged."})
 
 
 if __name__ == "__main__":
