@@ -23,6 +23,16 @@ register_schema = {
     'required': ['email', 'username', 'password', 'firstname', 'lastname', 'address', 'city', 'country', 'phone']
 }
 
+password_reset_schema = {
+    'type': 'object',
+    'properties': {
+        'old_password': {'type': 'string'},
+        'password': {'type': 'string'}
+    },
+    'required': ['old_password', 'password']
+}
+
+
 user_edit_schema = {
     'type': 'object',
     'properties': {

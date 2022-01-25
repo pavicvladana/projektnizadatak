@@ -209,6 +209,25 @@ def edit_user():
 
     return jsonify({"msg":"user successfully modified!"})
 
+@app.route('/user/reset-password', methods=["POST"])
+@jwt_required()
+@expects_json(password_reset_schema)
+def reset_password():
+    data = request.get_json()
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return jsonify({"error":"unable to find user"})
+
+    if user.password != data['old_password']:
+        return jsonify({"error":"wrong old password!"})
+
+    user.password = data['password']
+
+    db.session.commit()
+
+    return jsonify({"msg":"password successfully changed!"})
+
 @app.route("/user", methods=["GET"])
 @jwt_required()
 def user():
@@ -311,6 +330,8 @@ def send_money_to_user():
     if not receiver.active:
         return jsonify({"error":"user is not activated"})
     
+    if receiver.username == user.username:
+        return jsonify({"error":"you cannot send money to your accounts."})
 
     acc = Account.query.filter_by(id=data['acc_id']).first()
     if acc is None:
@@ -396,7 +417,7 @@ def send_to_bank_account(payer, acc_id, receiver, amount, app):
         db.session.add(trans)
         db.session.commit()
         sleep(10)
-        
+
         if acc.balance < amount:
             trans.state = str(ETransactionState.failed)
             return jsonify({"error":"not enough money on account."})

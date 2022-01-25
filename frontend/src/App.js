@@ -18,6 +18,7 @@ import {
   Link,
   useNavigate,
 } from "react-router-dom";
+import ResetPassword from "./components/PasswordReset";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route exact path="/deposit" element={<Deposit />}></Route>
           <Route exact path="/user/accounts" element={<UserAccounts />}></Route>
           <Route exact path="/user" element={<User />}></Route>
+          <Route exact path="/user/resetpassword" element={<ResetPassword />}></Route>
           <Route exact path="/transfer-money" element={<TransferMoney />}></Route>
           <Route exact path="/user/transactions" element={<Transactions />}></Route>
           <Route exact path="/exchange" element={<Exchange />}></Route>
