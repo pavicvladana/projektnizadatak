@@ -420,7 +420,8 @@ def send_to_bank_account(payer, acc_id, receiver, amount, app):
 
         if acc.balance < amount:
             trans.state = str(ETransactionState.failed)
-            return jsonify({"error":"not enough money on account."})
+            db.session.commit()
+            return
         
         trans.state = str(ETransactionState.success)
         acc.balance -= amount
