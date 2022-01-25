@@ -43,7 +43,7 @@ function Login() {
             login(data.access_token)
             localStorage.setItem("active", data.active)
             console.log(data)
-            navigate("/home");
+            window.location.href = "/home";
           }
         }
       })
@@ -70,7 +70,7 @@ function Login() {
           {...register("password", { required: true })}
         />
 
-        <input type="submit" />
+        <input type="submit" value='Login' />
       </form>
     </div>
   );

@@ -86,7 +86,7 @@ function Register() {
                 <h3>Country : {user? user.country : ""}</h3>
                 <h3>Phone : {user? user.phone : ""}</h3>
                 <Button variant="outlined" onClick={() => { setEditingState(true) }}>Edit profile</Button>
-                <Button variant="outlined" onClick={() => { }}>Change password</Button>
+                <Button variant="outlined" onClick={() => { navigate('/user/resetpassword')}}>Change password</Button>
             </div>
             :
             <div >
@@ -135,7 +135,7 @@ function Register() {
                         defaultValue={user? user.phone:""}
                         {...register("phone", { required: true, maxLength: 12 })}
                         />
-                    <input type="submit" />
+                    <input type="submit" value='Change' />
                 </form>
             </div>
         }

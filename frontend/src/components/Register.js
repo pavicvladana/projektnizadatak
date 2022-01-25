@@ -47,7 +47,7 @@ function Register() {
           alert(data.msg);
         }
         if(data.msg){
-          navigate("/login");
+          window.location.href = "/login";
         }
       })
       .catch((err) => console.log(err));
@@ -107,7 +107,7 @@ function Register() {
         />
         
 
-        <input type="submit" />
+        <input type="submit"  value='Register' />
       </form>
     </div>
   );
