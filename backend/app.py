@@ -359,7 +359,8 @@ def send_to_user_process(payer, acc, receiver, amount, app):
         acc = Account.query.filter_by(id=acc.id).first()
         if acc.balance < amount:
             trans.state = str(ETransactionState.failed)
-            return jsonify({"error":"not enough money on account."})
+            db.session.commit()
+            return
 
         receiver_acc = Account.query.filter_by(owner=receiver.username, currency=acc.currency).first()
         if receiver_acc is None:
