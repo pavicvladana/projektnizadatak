@@ -29,7 +29,7 @@ export default function Activate() {
           }
           if(data.msg){
             localStorage.setItem("active", true)
-            navigate("/home");
+            window.location.href = "/home";
           }
         })
         .catch((err) => console.log(err));
