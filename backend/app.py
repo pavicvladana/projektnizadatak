@@ -7,7 +7,7 @@ from locale import currency
 from time import sleep
 from urllib import response
 from decimal import Decimal
-from flask import Flask, request, Response
+from flask import Flask, request, Response, session
 from flask import jsonify
 import requests
 from flask_jwt_extended import create_access_token
@@ -357,9 +357,9 @@ def send_to_user_process(payer, acc, receiver, amount, app):
         
         db.session.commit()
 
-#@app.route("/user/sent-to-bank-account")
-#@jwt_required()
-#@expects_json(send_schema)
+@app.route("/user/sent-to-bank-account", methods=["POST"])
+@jwt_required()
+@expects_json(send_schema)
 def send_money_to_bank_account():
     data = request.get_json()
     username = get_jwt_identity()
@@ -369,23 +369,42 @@ def send_money_to_bank_account():
     if not user.active:
         return jsonify({"error":"user is not activated"})
     
-    receiver = User.query.filter_by(username=data['to']).first()
-    if receiver is None:
-        return jsonify({"error":"unable to find user"})
-    if not receiver.active:
-        return jsonify({"error":"user is not activated"})
-    
-    acc = Account.query.filter_by(owner=user.username, currency=data['currency']).first()
+    acc = Account.query.filter_by(id=data['acc_id']).first()
+    if acc is None:
+        return jsonify({"error":"there is no account with given currency"})
 
     amount = Decimal(data['amount'])
     
     if acc.balance < amount:
         return jsonify({"error":"not enough money on account."})
     
-    acc.balance -= amount
-    db.session.commit()
+    process = Thread(target=send_to_bank_account, args=(user, acc.id, data['to'], amount, app,))
+    process.start()
 
     return jsonify({"msg":"money deposited."})
+
+def send_to_bank_account(payer, acc_id, receiver, amount, app):
+    with app.app_context():
+        acc = Account.query.filter_by(id=acc_id).first()
+        trans = Transaction(
+            amount = amount,
+            payer = payer.username,
+            currency = acc.currency,
+            receiver = receiver,
+            state = str(ETransactionState.in_progress)
+        )
+        db.session.add(trans)
+        db.session.commit()
+        sleep(10)
+        
+        if acc.balance < amount:
+            trans.state = str(ETransactionState.failed)
+            return jsonify({"error":"not enough money on account."})
+        
+        trans.state = str(ETransactionState.success)
+        acc.balance -= amount
+        sleep(10)
+        db.session.commit()
 
 @app.route("/exchange")
 @jwt_required()
