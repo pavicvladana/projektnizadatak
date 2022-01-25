@@ -20,6 +20,7 @@ export default function ColorToggleButton() {
   const [choice, setChoice] = React.useState('web');
 
   const handleChange = (event, newChoice) => {
+    console.log(event)
     setChoice(newChoice);
   };
 
@@ -43,7 +44,12 @@ export default function ColorToggleButton() {
         { choice == "Send to user" ?
             <TransferMoneyToUser/>
             :
-            <TransferMoneyToBankAcc/>
+            <></>
+        }
+        { choice == "Send to bank account" ?
+          <TransferMoneyToBankAcc/>
+          :
+          <></>  
         }
       </Box>
     </Stack>
