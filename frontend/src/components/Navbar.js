@@ -8,6 +8,7 @@ import Button from "@material-ui/core/Button";
 import MenuIcon from "@material-ui/icons/Menu";
 import { useAuth, logout } from "../auth";
 import { NavLink, useNavigate } from "react-router-dom";
+import HomeIcon from '@mui/icons-material/Home';
 
 const useStyles = makeStyles((theme) => ({
   menuButton: {
@@ -42,11 +43,8 @@ const Navbar = () => {
           aria-label="menu"
           className={classes.menuButton}
         >
-          <MenuIcon />
+          <HomeIcon onClick={() => {window.location.href = '/home';}} />
         </IconButton>
-        <Typography variant="h6" className={classes.title}>
-          <NavLink to="/home">Home</NavLink>
-        </Typography>
         { logged_in ? 
             (!active ?
             <>
